@@ -1,18 +1,24 @@
-#include <stdio.h>
-#include <string.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include <stdio.h>		// for printf(), gets()
+#include <string.h>		// for memset(), strcpy(), strlen()
+#include <sys/socket.h> // for socket(), recvfrom(), sendto()
+#include <arpa/inet.h>	// for sockaddr_in, inet_addr(), htons()
+#include <unistd.h>		// for close()
+
+#define PORT 8888
+#define IP_ADDRESS "127.0.0.1"
+#define BUFFER_SIZE 1024
 
 int main(void)
 {
 	int socket_desc;
 	struct sockaddr_in server_addr;
-	char server_message[2000], client_message[2000];
 	int server_struct_length = sizeof(server_addr);
+	char server_message[BUFFER_SIZE];
+	char client_message[BUFFER_SIZE];
 
 	// Clean buffers:
-	memset(server_message, '\0', sizeof(server_message));
-	memset(client_message, '\0', sizeof(client_message));
+	memset(server_message, 0, sizeof(server_message));
+	memset(client_message, 0, sizeof(client_message));
 
 	// Create socket:
 	socket_desc = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -26,12 +32,12 @@ int main(void)
 
 	// Set port and IP:
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(2000);
-	server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	server_addr.sin_port = htons(PORT);
+	server_addr.sin_addr.s_addr = inet_addr(IP_ADDRESS);
 
 	// Get input from the user:
 	printf("Enter message: ");
-	gets(client_message);
+	fgets(client_message, BUFFER_SIZE, stdin);
 
 	// Send the message to server:
 	if (sendto(socket_desc, client_message, strlen(client_message), 0,
